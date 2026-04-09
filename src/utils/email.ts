@@ -1,6 +1,14 @@
-import nodemailer from 'nodemailer';
+import nodemailer, { Transporter } from 'nodemailer';
+import { IInquiry } from '../types/models.js';
 
-const createTransporter = () => {
+interface SendEmailParams {
+  to: string;
+  subject: string;
+  html: string;
+  text?: string;
+}
+
+const createTransporter = (): Transporter => {
   return nodemailer.createTransport({
     host: process.env.EMAIL_HOST || 'smtp.gmail.com',
     port: parseInt(process.env.EMAIL_PORT || '587'),
@@ -12,12 +20,7 @@ const createTransporter = () => {
   });
 };
 
-export const sendEmail = async ({ to, subject, html, text }: {
-  to: string;
-  subject: string;
-  html: string;
-  text?: string;
-}) => {
+export const sendEmail = async ({ to, subject, html, text }: SendEmailParams): Promise<void> => {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
     console.log(`[Email skipped - no config] To: ${to}, Subject: ${subject}`);
     return;
@@ -25,11 +28,14 @@ export const sendEmail = async ({ to, subject, html, text }: {
   const transporter = createTransporter();
   await transporter.sendMail({
     from: `"LandIQ" <${process.env.EMAIL_USER}>`,
-    to, subject, html, text,
+    to,
+    subject,
+    html,
+    text,
   });
 };
 
-export const welcomeEmail = (name: string) => `
+export const welcomeEmail = (name: string): string => `
 <!DOCTYPE html>
 <html>
 <body style="font-family: sans-serif; background: #0f1117; color: #fff; padding: 40px;">
@@ -56,7 +62,7 @@ export const welcomeEmail = (name: string) => `
 </html>
 `;
 
-export const inquiryEmail = (inquiry: any, land: any) => `
+export const inquiryEmail = (inquiry: Partial<IInquiry>, land: any): string => `
 <!DOCTYPE html>
 <html>
 <body style="font-family: sans-serif; background: #0f1117; color: #fff; padding: 40px;">

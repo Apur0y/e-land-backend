@@ -37,6 +37,7 @@ router.post('/register', async (req: IAuthenticatedRequest, res: Response): Prom
   }
 });
 
+
 // POST /api/auth/login
 router.post('/login', async (req: IAuthenticatedRequest, res: Response): Promise<any> => {
   try {
@@ -59,11 +60,23 @@ router.post('/login', async (req: IAuthenticatedRequest, res: Response): Promise
     await user.save({ validateBeforeSave: false });
 
     const token = generateToken(user._id.toString());
-    res.json({ success: true, token, user });
+    // res.json({ success: true, token, user });
+
+    // ✅ Set token in cookie
+    res.cookie('accessToken', token, {
+      httpOnly: true,           // prevents XSS attacks
+      secure: true,// only https in prod
+      sameSite: 'none',       // CSRF protection
+    });
+
+    res.json({ success: true, user }); // no need to send token in body
+  
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Internal server error';
     res.status(500).json({ success: false, message });
   }
+
+
 });
 
 // GET /api/auth/me

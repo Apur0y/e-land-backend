@@ -8,11 +8,12 @@ import { connectDB } from './config/db.js';
 
 // Route imports
 import authRoutes from './routes/auth.js';
-import landRoutes from './routes/land.js';
+import landRoutes from './routes/land.routes.js';
 import aiRoutes from './routes/ai.js';
 import adminRoutes from './routes/admin.js';
 import reportRoutes from './routes/reports.js';
 import inquiryRoutes from './routes/inquiries.js';
+import paymentRoutes from './models/payment/payment.controler.js';
 
 dotenv.config();
 
@@ -73,6 +74,7 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/inquiries', inquiryRoutes);
+app.use('/api/payment', paymentRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {

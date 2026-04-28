@@ -29,21 +29,23 @@ router.post("/create-checkout-session", async (req, res) => {
       cancel_url: "http://localhost:3000/cancel",
     });
 
-    res.json({ id: session.id });
+      res.json({ url: session.url });
+
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    const error = err instanceof Error ? err : new Error("Unknown error");
+    res.status(500).json({ error: error.message });
   }
 });
 
 
 router.post("/webhook", express.raw({ type: "application/json" }), (req, res) => {
-  const sig = req.headers["stripe-signature"];
+  const sig = req.headers["stripe-signature"] ||"";
 
   try {
     const event = stripe.webhooks.constructEvent(
       req.body,
       sig,
-      process.env.STRIPE_WEBHOOK_SECRET
+      process.env.STRIPE_WEBHOOK_SECRET ||""
     );
 
     if (event.type === "checkout.session.completed") {
@@ -55,7 +57,8 @@ router.post("/webhook", express.raw({ type: "application/json" }), (req, res) =>
 
     res.json({ received: true });
   } catch (err) {
-    res.status(400).send(`Webhook Error: ${err.message}`);
+    const error = err instanceof Error ? err : new Error("Unknown error");
+    res.status(500).json({ error: error.message });
   }
 });
 

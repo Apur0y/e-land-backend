@@ -25,17 +25,31 @@ router.post("/create-checkout-session", async (req, res) => {
           quantity: 1,
         },
       ],
-      success_url: "http://localhost:3000/dashboard",
-      cancel_url: "http://localhost:3000/cancel",
+      success_url: `${process.env.FRONTEND_URL}/success`,
+      cancel_url: `${process.env.FRONTEND_URL}/cancel`,
     });
 
       res.json({ url: session.url });
+      console.log(session)
 
   } catch (err) {
     const error = err instanceof Error ? err : new Error("Unknown error");
     res.status(500).json({ error: error.message });
   }
 });
+
+
+
+
+
+router.get('/get-history',async(req,res)=>{
+ const sessions = await stripe.checkout.sessions.list({
+    limit: 10,
+  });
+
+  res.json(sessions.data)
+})
+
 
 
 router.post("/webhook", express.raw({ type: "application/json" }), (req, res) => {
